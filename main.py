@@ -28,7 +28,13 @@ async def start_handler2(message:types.Message):
 
 @dp.message_handler()
 async def echo(message:types.Message):
-    await message.answer(message.text)
+    if message.text.isdigit():
+        squared=int(message.text)**2
+        await message.answer(str(squared))
+    else:
+        await message.answer(str(message.text))
+
+
 
 
 
