@@ -1,6 +1,6 @@
 from aiogram import types, executor
 import logging
-from handlers import commands, echo, quiz
+from handlers import commands, echo, quiz, FSM_registration
 from config import dp, Admins, bot
 
 
@@ -17,6 +17,7 @@ async def on_shutdown(_):
 
 commands.register_handlers(dp)
 quiz.register_handlers(dp)
+FSM_registration.register_handlers_fsm(dp)
 
 
 echo.register_handlers(dp)
