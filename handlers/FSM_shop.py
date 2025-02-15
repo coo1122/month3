@@ -2,24 +2,27 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from db import main_db
 
 class FSM_shop(StatesGroup):
-    clothing_model = State()
+    name_product = State()
     size = State()
     category = State()
     price = State()
+    productid = State()
+    infoproduct = State()
     product_photo = State()
-    submit=State()
+    submit = State()
 
 
 async def start_fsm_shop(message: types.Message):
-    await FSM_shop.clothing_model.set()
+    await FSM_shop.name_product.set()
     await message.answer('Модель одежды:')
 
 
-async def load_clothing_model(message: types.Message, state: FSMContext):
+async def load_name_product(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['clothing_model'] = message.text
+        data['name_product'] = message.text
 
     await FSM_shop.next()
     await message.answer('Размер одежды:')
@@ -49,6 +52,23 @@ async def load_price(message: types.Message, state: FSMContext):
 
 
     await FSM_shop.next()
+    await message.answer('ID товара:')
+
+async def load_productid(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['productid'] = message.text
+
+
+    await FSM_shop.next()
+    await message.answer('INFO товара:')
+
+
+async def load_infoproduct(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['infoproduct'] = message.text
+
+
+    await FSM_shop.next()
     await message.answer('Фото одежды:')
 
 
@@ -57,17 +77,35 @@ async def load_product_photo(message: types.Message, state: FSMContext):
         data['product_photo'] = message.photo[-1].file_id
 
 
-    await FSM_shop.next()
+    await FSM_shop.submit.set()
     await message.answer('Верны ли данные?')
     await message.answer_photo(photo=data['product_photo'],
-                               caption=f'Название модели - {data["clothing_model"]}\n'
+                               caption=f'Название моделм - {data["name_product"]}\n'
                                        f'Размер - {data["size"]}\n'
                                        f'Категория - {data["category"]}\n'
-                                       f'Стоимость - {data["price"]}\n')
+                                       f'Стоимость - {data["price"]}\n'
+                                       f'ID товара - {data["productid"]}\n'
+                                       f'INFO товара - {data["infoproduct"]}\n'
+                               )
 
 async def submit(message: types.Message, state: FSMContext):
     if message.text == 'да':
         async with state.proxy() as data:
+
+            await main_db.sql_insert_store(
+                name_product=data['name_product'],
+                size=data['size'],
+                price=data['price'],
+                photo=data['product_photo'],
+                productid=data['productid']
+            )
+
+            await main_db.sql_insert_products_details(
+                productid=data['productid'],
+                category=data['category'],
+                infoproduct=data['infoproduct']
+            )
+
             await message.answer('Ваши данные сохранены')
 
         await state.finish()
@@ -82,9 +120,11 @@ async def submit(message: types.Message, state: FSMContext):
 
 def register_handlers_fsm(dp: Dispatcher):
     dp.register_message_handler(start_fsm_shop, commands=['shop'])
-    dp.register_message_handler(load_clothing_model, state=FSM_shop.clothing_model)
+    dp.register_message_handler(load_name_product, state=FSM_shop.name_product)
     dp.register_message_handler(load_size, state=FSM_shop.size)
     dp.register_message_handler(load_category, state=FSM_shop.category)
     dp.register_message_handler(load_price, state=FSM_shop.price)
+    dp.register_message_handler(load_productid, state=FSM_shop.productid)
+    dp.register_message_handler(load_infoproduct, state=FSM_shop.infoproduct)
     dp.register_message_handler(load_product_photo, state=FSM_shop.product_photo, content_types=['photo'])
     dp.register_message_handler(submit, state=FSM_shop.submit)

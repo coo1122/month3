@@ -11,7 +11,8 @@ start_buttons = KeyboardButton('/start')
 mem_buttons = KeyboardButton('/mem')
 quiz_buttons = KeyboardButton('/quiz')
 reg_buttons = KeyboardButton('/registration')
-start.add(start_buttons, mem_buttons, quiz_buttons, reg_buttons)
+shop_buttons = KeyboardButton('/shop')
+start.add(start_buttons, mem_buttons, quiz_buttons, reg_buttons, shop_buttons)
 
 
 # Удаление кнопок из интерфейса
