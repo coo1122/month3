@@ -11,6 +11,7 @@ class FSM_shop(StatesGroup):
     price = State()
     productid = State()
     infoproduct = State()
+    collection = State()
     product_photo = State()
     submit = State()
 
@@ -68,6 +69,15 @@ async def load_infoproduct(message: types.Message, state: FSMContext):
         data['infoproduct'] = message.text
 
 
+        await FSM_shop.next()
+        await message.answer('Коллекция товара:')
+
+
+async def load_collection(message: types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['collection'] = message.text
+
+
     await FSM_shop.next()
     await message.answer('Фото одежды:')
 
@@ -86,6 +96,7 @@ async def load_product_photo(message: types.Message, state: FSMContext):
                                        f'Стоимость - {data["price"]}\n'
                                        f'ID товара - {data["productid"]}\n'
                                        f'INFO товара - {data["infoproduct"]}\n'
+                                       f'Коллекция товара - {data["collection"]}\n'
                                )
 
 async def submit(message: types.Message, state: FSMContext):
@@ -105,6 +116,12 @@ async def submit(message: types.Message, state: FSMContext):
                 category=data['category'],
                 infoproduct=data['infoproduct']
             )
+
+            await main_db.sql_insert_collection_products(
+                productid=data['productid'],
+                collection=data['collection']
+            )
+
 
             await message.answer('Ваши данные сохранены')
 
@@ -126,5 +143,6 @@ def register_handlers_fsm(dp: Dispatcher):
     dp.register_message_handler(load_price, state=FSM_shop.price)
     dp.register_message_handler(load_productid, state=FSM_shop.productid)
     dp.register_message_handler(load_infoproduct, state=FSM_shop.infoproduct)
+    dp.register_message_handler(load_collection, state=FSM_shop.collection)
     dp.register_message_handler(load_product_photo, state=FSM_shop.product_photo, content_types=['photo'])
     dp.register_message_handler(submit, state=FSM_shop.submit)

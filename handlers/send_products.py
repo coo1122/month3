@@ -25,6 +25,7 @@ async def send_all_products(call: types.CallbackQuery):
             f'Категория - {product["category"]}\n'
             f'Артикул - {product["productid"]}\n'
             f'Инфо - {product["infoproduct"]}\n'
+            f'Коллекция товара - {product["collection"]}\n'
             f'Цена - {product["price"]}')
 
             await call.message.answer_photo(photo=product["photo"],

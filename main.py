@@ -12,6 +12,7 @@ async def on_startup(_):
         await main_db.create_tables()
         await main_db.create_tables_store()
         await main_db.create_tables_products_details()
+        await main_db.create_tables_collection_products()
 
 
 async def on_shutdown(_):

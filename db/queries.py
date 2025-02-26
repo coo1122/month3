@@ -51,3 +51,18 @@ INSERT_TABLE_products_details = """
     INSERT INTO products_details (productid, category, infoproduct)
     VALUES (?, ?, ?)
 """
+
+
+TABLE_collection_products = """
+    CREATE TABLE IF NOT EXISTS collection_products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    productid TEXT,
+    collection TEXT
+    )
+"""
+
+
+INSERT_TABLE_collection_products = """
+    INSERT INTO collection_products (productid, collection)
+    VALUES (?, ?)
+"""
